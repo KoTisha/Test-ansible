@@ -1,0 +1,44 @@
+# ansible-playbook /home/dedicadmin/.ansible/ansible_pd/playbook/install_new/playbook-configure-new-server.yml --ask-vault-pass
+
+---
+- hosts: some_host
+  strategy: free
+
+  tasks:
+    - name: Update and install soft
+      apt:
+        update_cache: yes
+        name:
+        - nginx
+        - php7.0
+        - php7.0-fpm
+        - mysql-server
+        - default-libmysqlclient-dev
+        state: latest
+      become: yes
+
+    - name: Start 'php7.0-fpm'
+      service:
+        name: php7.0-fpm
+        enabled: yes
+        state: started
+      become: yes
+
+    - name: Copy nginx conf
+      copy:
+        src: "./phpinfo.conf"
+        dest: "/etc/nginx/conf.d/"
+        mode: 0644
+
+    - name: Copy index.php
+      copy:
+        src: "./index.php"
+        dest: "/var/www/html/"
+        mode: 0644
+
+    - name: Restarting nginx
+      service:
+        name: nginx
+        enabled: yes
+        state: restarted
+      become: yes
